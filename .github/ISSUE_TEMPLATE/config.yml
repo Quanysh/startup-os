@@ -1,0 +1,4 @@
+# Every issue starts from one of the forms beside this file: a bug report, a
+# feature request or a question. A security problem is never an issue: it is
+# reported privately from the repository's Security tab (SECURITY.md).
+blank_issues_enabled: false

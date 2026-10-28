@@ -1,0 +1,39 @@
+# dependencies
+node_modules/
+
+# build output
+.next/
+out/
+build/
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# env: every variant except the documented example
+.env
+.env.*
+# A copy the Finder makes (".env 2.local") has a space where the dot was.
+.env *
+!.env.example
+
+# convex local backend state
+.convex/
+
+# vercel
+.vercel
+
+# misc
+.DS_Store
+*.pem
+
+# claude code
+.claude/worktrees/
+
+# testing
+/coverage
+
+# workbooks hold client names; they never belong in this repository
+*.xlsx
+*.xls
+*.csv

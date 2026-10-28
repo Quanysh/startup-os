@@ -1,0 +1,25 @@
+[
+  {
+    "name": "SECRET Example Specialty Partners",
+    "contact": "SECRET Dr. Casey Placeholder",
+    "stage": "lead",
+    "nextStep": "Ask for twenty minutes with the billing lead",
+    "notes": "Made-up research: large group, athenahealth, prior-auth heavy.",
+    "priority": "High",
+    "sources": ["Made-up specialty market scan", { "title": "Sample payer mix note" }]
+  },
+  {
+    "name": "SECRET Sample Bone and Joint",
+    "contact": null,
+    "stage": "Qualified",
+    "nextStep": "",
+    "notes": "Made-up: met at a sample conference.",
+    "priority": "medium",
+    "sources": []
+  },
+  {
+    "name": "SECRET Placeholder Spine Center",
+    "stage": "lead",
+    "priority": "low"
+  }
+]

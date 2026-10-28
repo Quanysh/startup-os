@@ -1,0 +1,71 @@
+# Who must review what. Replace @your-github-handle with the owner's GitHub
+# handle (or a team, @your-org/owners) and uncomment the lines: a path listed
+# here then needs the owner's approval before a pull request that touches it
+# can merge (with branch protection's "Require review from Code Owners").
+# Everything not listed needs no particular reviewer.
+#
+# These are the parts that decide who gets in, what they are sent, what leaves
+# the OS, and where salaries and other people's mail are kept. CLAUDE.md says
+# why each one matters.
+
+# ── Who is let in, and what each person may use ──
+# /convex/lib/owner.ts            @your-github-handle
+# /convex/lib/roles.ts            @your-github-handle
+# /convex/lib/company.ts          @your-github-handle
+# /convex/lib/identity.ts         @your-github-handle
+# /convex/lib/features.ts         @your-github-handle
+# /convex/lib/featureGates.ts     @your-github-handle
+# /convex/authOwner.ts            @your-github-handle
+# /convex/auth*.ts                @your-github-handle
+# /convex/team.ts                 @your-github-handle
+# /convex/access.test.ts          @your-github-handle
+# /convex/publicSurface.test.ts   @your-github-handle
+
+# ── What comes in from outside, and the HTTP routes ──
+# /convex/ingest*.ts              @your-github-handle
+# /convex/http.ts                 @your-github-handle
+# /convex/standup.ts              @your-github-handle
+# /scripts/push*                  @your-github-handle
+
+# ── Salaries and costs ──
+# /convex/payroll*.ts             @your-github-handle
+# /convex/lib/payroll*.ts         @your-github-handle
+# /convex/costs*.ts               @your-github-handle
+# /convex/lib/costs*.ts           @your-github-handle
+# /convex/lib/hireCost*.ts        @your-github-handle
+# /convex/payrollReaders.test.ts  @your-github-handle
+# /convex/ownerOnlyAreas.test.ts  @your-github-handle
+
+# ── Each person's own mail, calendar, notes and token ──
+# /convex/connect.ts              @your-github-handle
+# /convex/lib/personal*.ts        @your-github-handle
+# /convex/mirror.ts               @your-github-handle
+
+# ── What leaves for a model: the OS's own agents ──
+# /convex/lib/modelClients.ts     @your-github-handle
+# /convex/agentRuntime.ts         @your-github-handle
+
+# ── Messages the OS sends ──
+# /convex/telegram*.ts            @your-github-handle
+# /convex/botEvents.ts            @your-github-handle
+# /convex/lib/botEvents.ts        @your-github-handle
+
+# ── The tables themselves ──
+# /convex/schema.ts               @your-github-handle
+
+# ── Local development: functions that empty tables and make sessions, and the
+#    guard that keeps them to a local backend ──
+# /scripts/dev/                   @your-github-handle
+# /convex/devSeed.ts              @your-github-handle
+# /convex/devSession.ts           @your-github-handle
+# /convex/lib/devLocal.ts         @your-github-handle
+
+# ── The rules, the checks and the deploy ──
+# /.github/                       @your-github-handle
+# /CLAUDE.md                      @your-github-handle
+# /vercel.json                    @your-github-handle
+# /eslint.config.mjs              @your-github-handle
+
+# ── Docs: real company figures must never land here (made-up ones only) ──
+# /docs/                          @your-github-handle
+# /.gitignore                     @your-github-handle

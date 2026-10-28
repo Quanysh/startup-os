@@ -1,0 +1,36 @@
+[
+  {
+    "dealName": "SECRET Example Specialty Partners",
+    "summary": "Made-up: a large physician-owned specialty group with seven sites, heavy on prior authorizations and MRI.",
+    "ownership": "Physician-owned",
+    "ehr": "athenahealth",
+    "pm": "athenaCollector",
+    "billingModel": "outsourced",
+    "rcmVendor": "Made-up RCM Co",
+    "specialties": ["Spine", "Sports medicine", "Joint replacement"],
+    "ancillaries": ["MRI", "Physical therapy"],
+    "workersComp": "Made-up: about a fifth of visits.",
+    "competitors": [{ "name": "Made-up RCM Co", "note": "The incumbent, contract ends next year" }],
+    "signals": [
+      { "date": "2026-08", "kind": "hiring", "text": "Hiring a revenue cycle director", "source": "Made-up job board" },
+      { "date": "2026-05-12", "kind": "growth", "text": "Opened a seventh site", "source": "Made-up local paper" }
+    ],
+    "people": [{ "name": "SECRET Dr. Casey Placeholder", "role": "Managing partner" }],
+    "painPoints": ["Prior authorization backlog"],
+    "talkingPoints": ["MRI denials"],
+    "risks": ["Locked into the incumbent until next year"],
+    "angle": "Made-up: lead with the prior authorization backlog.",
+    "nextBestAction": "Ask for twenty minutes with the billing lead",
+    "fit": { "score": 82, "reasons": ["Large group", "Outsourced billing"] },
+    "sources": [{ "title": "Made-up market scan", "url": "https://claude.ai/artifact/made-up-0001" }],
+    "researchedAt": "2026-10-01"
+  },
+  {
+    "name": "SECRET Sample Bone and Joint",
+    "ehr": "Made-up EHR",
+    "billingModel": "In-house",
+    "fit": { "score": 55 },
+    "confidence": "high"
+  },
+  { "dealName": "SECRET Placeholder Spine Center" }
+]

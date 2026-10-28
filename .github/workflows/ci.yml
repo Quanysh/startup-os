@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Every job only reads the repository. None is given a secret, and none is
+# needed: the tests run Convex in memory and the build talks to no backend.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Lint and both tsconfigs (the app and convex/).
+  static:
+    runs-on: ubuntu-latest
+    # The suite passed 15,000 tests in October 2026 and outgrew 15 minutes on
+    # the hosted runner: a run past the limit is cancelled, not failed.
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+
+  # Pure-function tests and convex-test suites; no backend needed. Split three
+  # ways: in one job the suite's per-file setup (collect, environment) took
+  # about as long as the tests themselves and ran up against the 15 minutes.
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test --shard=${{ matrix.shard }}/3
+
+  # The production build, without a backend. The address is a placeholder
+  # on a reserved domain that resolves nowhere: the build only shapes the
+  # Content-Security-Policy from it and never connects.
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+        env:
+          NEXT_PUBLIC_CONVEX_URL: https://ci-build.invalid
+
+  # The status the ruleset requires by name: green only when every job above
+  # is. `always()` so a failed or cancelled job is a red `check`, never a
+  # skipped one (a skipped required check would not block a merge).
+  check:
+    if: always()
+    needs: [static, test, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Every job passed
+        run: |
+          echo "static=${{ needs.static.result }} test=${{ needs.test.result }} build=${{ needs.build.result }}"
+          test "${{ needs.static.result }}" = success
+          test "${{ needs.test.result }}" = success
+          test "${{ needs.build.result }}" = success
+
+  # A belt to .gitignore's braces: fail if an environment file, a key or the
+  # local backend's state is tracked, however it got past the ignore rules
+  # (`git add -f`, a renamed file). Only `.env.example` may be in the repository.
+  no-secret-files:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: No environment file, key, spreadsheet or local backend state is tracked
+        run: |
+          found="$(git ls-files | grep -E '(^|/)\.env($|[. ])|\.pem$|\.xlsx$|(^|/)\.convex/' | grep -vE '(^|/)\.env\.example$' || true)"
+          if [ -n "$found" ]; then
+            echo "These files must not be in the repository. Remove them from the commit"
+            echo "(git rm --cached <file>), and if one held a real secret, tell the owner:"
+            echo "it has to be replaced, not only deleted."
+            echo "$found"
+            exit 1
+          fi
+          echo "No environment file, key, spreadsheet or local backend state is tracked."

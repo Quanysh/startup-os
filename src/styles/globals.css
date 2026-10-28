@@ -1,0 +1,695 @@
+/* Scan only src/ for class names. Tailwind's default is to watch the whole
+ * project, which includes .convex/ — the local Convex backend's database,
+ * rewritten constantly in dev — and that sends the dev server into a rebuild
+ * loop (every page taking 20+ seconds at several cores of CPU). */
+@import "tailwindcss" source(none);
+@source "../";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* The palette, a neutral default to make your own: the brand colour
+ * (`--color-brand`) with its bright and deep neighbours, ink #2E2E2E, and
+ * the #FCFCFC / #F2F5F7 / #FFFFFF surfaces. The brand's values are written
+ * only in the token blocks below: the public template's export swaps them
+ * for a neutral default by rule, so say "the brand colour" in a comment, never
+ * its value.
+ *
+ * Two themes. The values in this block (and in `:root` below) are the light
+ * theme, as on the site, and are not to be changed for the dark one's sake.
+ * The dark theme is the `.dark` block further down: it gives every colour
+ * here a second value and nothing else. A component never names a colour
+ * itself (no hex, no `white`, no `black`): it wears a token, so it is right
+ * in both. `src/styles/colours.test.ts` fails on a colour outside these
+ * blocks or a token with no dark value; `src/styles/contrast.test.ts` holds
+ * the pairs to their contrast in both themes. */
+@theme {
+  --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  /* Inter, for columns of numbers that must align (tables, axis ticks). */
+  --font-num: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --color-page: #fcfcfc;
+  --color-surface: #f2f5f7;
+  --color-panel: #ffffff;
+  --color-line: #e3e8f3;
+
+  --color-ink: #2e2e2e;
+  --color-ink-2: #6d6d6d; /* ink at 70% on white */
+  --color-ink-3: #969696; /* ink at 50% on white */
+
+  /* `brand` is the blue of words, links, icons, marks and tints: it is
+   * lightened in the dark theme so it reads on a dark panel. `brand-fill` is
+   * the blue a filled button is made of, with `on-brand` for the words on it:
+   * the same blue in both themes, so a button stays the brand's. Its hover is
+   * `brand-deep`. */
+  --color-brand: #475569;
+  --color-brand-fill: #64748b;
+  --color-on-brand: #ffffff;
+  --color-brand-bright: #64748b;
+  --color-brand-deep: #475569;
+  --color-brand-ice: #e2e8f0;
+
+  /* Words on an `ink` ground (the sparkline's bubble), and the veil behind a
+   * dialog or a sheet. */
+  --color-on-ink: #ffffff;
+  --color-scrim: #000000;
+
+  /* Status colours are reserved for state and never used as a series colour.
+   * They always appear with an icon and a label, never alone. */
+  --color-good: #4bb44b;
+  --color-watch: #eda100;
+  --color-weak: #ed6a5a;
+
+  /* ── Tables and their chips ────────────────────────────────────────────
+   * Everything below is used by src/components/ui/data-table.tsx and
+   * src/components/ui/status-chip.tsx. Contrast figures are WCAG ratios.
+   *
+   * States. One tinted chip per meaning: `-soft` is the chip's ground,
+   * `-ink` its words and icon (5.7:1 or more on its own tint, 5.7:1 or more
+   * on every row ground below). A state always comes with a word. */
+  --color-success-soft: #e2f4e2; /* done well: paid, working, healthy, signed in */
+  --color-success-ink: #1e6b2a;
+  --color-warning-soft: #fdefc8; /* look at this: due soon, watch, incomplete, not set */
+  --color-warning-ink: #7a5200;
+  --color-danger-soft: #fde4df; /* act on this: overdue, at risk, failed */
+  --color-danger-ink: #a3301f; /* also an amount owed, in a number column */
+  --color-info-soft: #dcebfb; /* in hand, neither good nor bad: draft, in progress */
+  --color-info-ink: #0a4f9e;
+  --color-neutral-soft: #e9edf2; /* a state with no judgement: unconfirmed, not yet, churned */
+  --color-neutral-ink: #4a5361;
+
+  /* A row that needs attention: a faint ground and a bar down its left edge
+   * (3.3:1 or more on that ground). Body text keeps 4.5:1 on both grounds. */
+  --color-row-danger: #fff1ee;
+  --color-row-warning: #fff6dc;
+  --color-danger-mark: #d8402f;
+  --color-warning-mark: #b97a00;
+
+  /* Kinds: what a thing is, never how it is doing. Quieter than a state: a
+   * paler ground, a dot, regular weight. The four hues were validated
+   * together with the dataviz skill's validate_palette.js (--pairs all) on
+   * the panel, the stripe and the hover ground: all checks pass, worst
+   * colour-blind separation ΔE 16.1, each dot 3:1 or more on its own tint.
+   * Slate is the fifth, for "the default one" (owner, typed in by hand).
+   * `-ink` is 6.6:1 or more on `-soft`. No green, red, amber or blue: those
+   * are states. */
+  --color-kind-teal: #1e96a8;
+  --color-kind-teal-soft: #e9f6f8;
+  --color-kind-teal-ink: #0f5f6c;
+  --color-kind-violet: #543bbb;
+  --color-kind-violet-soft: #efecfa;
+  --color-kind-violet-ink: #4a33a8;
+  --color-kind-plum: #823d5b;
+  --color-kind-plum-soft: #f7ecf0;
+  --color-kind-plum-ink: #75304f;
+  --color-kind-sand: #a66b29;
+  --color-kind-sand-soft: #f8f0e3;
+  --color-kind-sand-ink: #754a14;
+  --color-kind-slate: #667085;
+  --color-kind-slate-soft: #eef1f5;
+  --color-kind-slate-ink: #475467;
+
+  /* The table's own grounds. Secondary text (ink-2) keeps 4.5:1 on each. */
+  --color-table-head: #eaf0f9; /* the header band, and the totals band */
+  --color-table-head-ink: #44506a; /* column names: 7:1 on the band */
+  --color-table-rule: #c5d0e2; /* the line under the header and over the totals */
+  --color-table-stripe: #f0f5fb; /* every second record */
+  --color-table-hover: #e8f1fd; /* the row under the pointer or holding focus */
+
+  /* Sparkline de-emphasis line; the current point wears the brand colour. */
+  --color-trend: #b9c3d1;
+
+  --radius-card: 24px;
+  --radius-inner: 12px;
+
+  /* Motion, used on the Finance page and always behind `motion-safe:`, so
+   * `prefers-reduced-motion: reduce` gets the final state with no movement.
+   * None of them changes a box's size: opacity, transform and clip-path only.
+   * `rise`: a section arrives (its delay is its place in the order).
+   * `wipe`: a chart's lines and areas draw in from the left.
+   * `grow`: a bar rises from its baseline. */
+  --animate-rise: rise 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-wipe: wipe 900ms cubic-bezier(0.65, 0, 0.35, 1) 160ms both;
+  --animate-grow: grow 640ms cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes wipe {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+  @keyframes grow {
+    from {
+      transform: scaleY(0);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.75rem;
+  --background: #fcfcfc;
+  --foreground: #2e2e2e;
+  --card: #ffffff;
+  --card-foreground: #2e2e2e;
+  --popover: #ffffff;
+  --popover-foreground: #2e2e2e;
+  --primary: #64748b;
+  --primary-foreground: #ffffff;
+  --secondary: #f2f5f7;
+  --secondary-foreground: #2e2e2e;
+  --muted: #f2f5f7;
+  --muted-foreground: #6d6d6d;
+  --accent: #f2f5f7;
+  --accent-foreground: #2e2e2e;
+  --destructive: #d8402f;
+  --border: #e3e8f3;
+  --input: #e3e8f3;
+  --ring: #64748b;
+  --sidebar: #f2f5f7;
+  --sidebar-foreground: #2e2e2e;
+  --sidebar-primary: #64748b;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #ffffff;
+  --sidebar-accent-foreground: #64748b;
+  --sidebar-border: #e3e8f3;
+  --sidebar-ring: #64748b;
+
+  /* Chart series. Validated as a pair on the white panel with the dataviz
+     skill's validate_palette.js (all checks pass; worst colour-blind
+     separation ΔE 15.5), and each is about ΔE 21 or more from the status
+     colours, which mean good / watch / weak everywhere else. */
+  --chart-1: #2a78d6;
+  --chart-2: #a8327e;
+  /* Two more, for the runway chart (baseline plus up to three scenarios).
+     The four in order pass every check on white (adjacent; worst CVD ΔE 6.6,
+     deutan, teal beside magenta: legal only with secondary encoding, so each
+     line also has its own dash, a legend and a direct end label, and a table
+     sits beside it). Not drawn next to a status colour. */
+  --chart-3: #108f78;
+  --chart-4: #9a5a2a;
+
+  /* The site's soft raised look. Used on tiles; not on every surface. Kept
+   * here, not in `@theme`: Tailwind writes a theme shadow's value into the
+   * utility, where the dark theme could not replace it. The three utilities
+   * are at the foot of this file. */
+  --shadow-soft: -5px -5px 12px rgba(255, 255, 255, 0.7), 5px 5px 14px rgba(171, 174, 184, 0.22);
+  --shadow-soft-sm: -2px -2px 6px rgba(255, 255, 255, 0.8), 2px 3px 8px rgba(171, 174, 184, 0.2);
+  --shadow-inset: inset -4px -4px 8px rgba(255, 255, 255, 0.6), inset 4px 4px 8px rgba(171, 174, 184, 0.22);
+
+  /* The two lights of `wash-brand`, each with its own transparent end. */
+  --wash-ice: rgba(226, 232, 240, 0.75);
+  --wash-ice-0: rgba(226, 232, 240, 0);
+  --wash-blue: rgba(71, 85, 105, 0.07);
+  --wash-blue-0: rgba(71, 85, 105, 0);
+
+  /* How strongly a column group's colour veils its cells (data-table). */
+  --group-veil: 6%;
+  --group-veil-strong: 11%;
+
+  color-scheme: light;
+}
+
+/* ── The dark theme ──────────────────────────────────────────────────────
+ * On `<html class="dark">`, put there before first paint by the inline script
+ * in src/app/layout.tsx and kept there by ThemeProvider. Every colour above
+ * has a value here; that is all this block is.
+ *
+ * Grounds are a deep neutral blue, not black, so the brand colour still reads
+ * as the brand's: the page darkest, the sidebar and wells one step up, panels
+ * one more. Ink is near-white in the same three steps (each 4.5:1 or more on
+ * every ground a table row can have). Contrast figures are WCAG ratios and
+ * are asserted in src/styles/contrast.test.ts. */
+.dark {
+  color-scheme: dark;
+
+  --color-page: #0c1219;
+  --color-surface: #121a24;
+  --color-panel: #18212d;
+  --color-line: #2a3647;
+
+  --color-ink: #f1f4f8;
+  --color-ink-2: #aab5c5;
+  --color-ink-3: #8f9cae;
+
+  --color-brand: #cbd5e1; /* 10.9:1 on the panel */
+  --color-brand-fill: #64748b; /* white on it is 4.8:1 */
+  --color-on-brand: #ffffff;
+  --color-brand-bright: #94a3b8;
+  --color-brand-deep: #475569;
+  --color-brand-ice: #1e293b;
+
+  --color-on-ink: #0c1219;
+  --color-scrim: #000000;
+
+  --color-good: #5cc85c;
+  --color-watch: #f0b429;
+  --color-weak: #f58373;
+
+  /* States: a deep tint of the hue for the chip, a pale step of it for the
+   * words (7:1 or more on its own tint and on every row ground). */
+  --color-success-soft: #143621;
+  --color-success-ink: #8fe09a;
+  --color-warning-soft: #3f300a;
+  --color-warning-ink: #f5cf6b;
+  --color-danger-soft: #481e19;
+  --color-danger-ink: #ffada0;
+  --color-info-soft: #12335a;
+  --color-info-ink: #9ecbff;
+  --color-neutral-soft: #263140;
+  --color-neutral-ink: #c3cedc;
+
+  --color-row-danger: #2b1a18;
+  --color-row-warning: #2a2210;
+  --color-danger-mark: #f0624f;
+  --color-warning-mark: #e0a21a;
+
+  /* Kinds. The four hues were validated together on the dark panel with the
+   * dataviz skill's validate_palette.js (--mode dark --pairs all): all checks
+   * pass on the panel, the stripe and the hover ground, worst colour-blind
+   * separation ΔE 9.1. */
+  --color-kind-teal: #2aa5b9;
+  --color-kind-teal-soft: #10313a;
+  --color-kind-teal-ink: #8fdbe8;
+  --color-kind-violet: #7868e8;
+  --color-kind-violet-soft: #221d47;
+  --color-kind-violet-ink: #c4b8ff;
+  --color-kind-plum: #c0527f;
+  --color-kind-plum-soft: #2f1722;
+  --color-kind-plum-ink: #f0b3cd;
+  --color-kind-sand: #b58f3c;
+  --color-kind-sand-soft: #372812;
+  --color-kind-sand-ink: #f0c690;
+  --color-kind-slate: #8e9bb0;
+  --color-kind-slate-soft: #232c3a;
+  --color-kind-slate-ink: #c0cada;
+
+  --color-table-head: #1d2836;
+  --color-table-head-ink: #b3c0d4;
+  --color-table-rule: #3a4a60;
+  --color-table-stripe: #1b2531;
+  --color-table-hover: #1c2c42;
+
+  --color-trend: #4a5769;
+
+  /* shadcn's names, each the token it stands for. */
+  --background: var(--color-page);
+  --foreground: var(--color-ink);
+  --card: var(--color-panel);
+  --card-foreground: var(--color-ink);
+  --popover: #1d2734; /* a step above the panel: it floats over one */
+  --popover-foreground: var(--color-ink);
+  --primary: var(--color-brand-fill);
+  --primary-foreground: var(--color-on-brand);
+  --secondary: #1f2a38;
+  --secondary-foreground: var(--color-ink);
+  --muted: #1c2632;
+  --muted-foreground: var(--color-ink-2);
+  --accent: #263242;
+  --accent-foreground: var(--color-ink);
+  --destructive: #ff7b69;
+  --border: var(--color-line);
+  --input: #3a4a60;
+  --ring: var(--color-brand);
+  --sidebar: var(--color-surface);
+  --sidebar-foreground: var(--color-ink);
+  --sidebar-primary: var(--color-brand-fill);
+  --sidebar-primary-foreground: var(--color-on-brand);
+  --sidebar-accent: #1f2b3b;
+  --sidebar-accent-foreground: var(--color-brand);
+  --sidebar-border: var(--color-line);
+  --sidebar-ring: var(--color-brand);
+
+  /* Validated as a pair on the dark panel (validate_palette.js --mode dark):
+     all checks pass, worst colour-blind separation ΔE 11.0; each is ΔE 15 or
+     more from the dark status colours. */
+  --chart-1: #3987e5;
+  --chart-2: #c65aae;
+  /* The four on the dark panel (--mode dark --surface #18212d): every check
+     passes; worst adjacent CVD ΔE 6.4 (deutan), with the same secondary
+     encoding as in the light theme. */
+  --chart-3: #26a88c;
+  --chart-4: #b8763f;
+
+  /* No white glow on a dark ground: a hairline of light round the edge, a
+     highlight along the top, and a short dark drop. */
+  --shadow-soft: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 0 0 1px rgba(255, 255, 255, 0.05), 0 10px 24px -12px rgba(0, 0, 0, 0.6);
+  --shadow-soft-sm: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.06), 0 2px 6px rgba(0, 0, 0, 0.35);
+  --shadow-inset: inset 0 0 0 1px rgba(255, 255, 255, 0.07), inset 0 2px 6px rgba(0, 0, 0, 0.45);
+
+  --wash-ice: rgba(203, 213, 225, 0.1);
+  --wash-ice-0: rgba(203, 213, 225, 0);
+  --wash-blue: rgba(100, 116, 139, 0.16);
+  --wash-blue-0: rgba(100, 116, 139, 0);
+
+  --group-veil: 10%;
+  --group-veil-strong: 18%;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-medium tracking-tight;
+  }
+}
+
+/* The table every list of records wears (src/components/ui/data-table.tsx).
+ * A row's ground is one variable, `--row-bg`, so the pinned first column of a
+ * phone-width table can wear the same ground as the row it belongs to. */
+@layer components {
+  [data-slot="data-table"] {
+    --row-bg: var(--table-bg, var(--color-panel));
+    /* Reset here, so a table opened inside a row never inherits that row's. */
+    --row-mark: transparent;
+  }
+  [data-slot="data-table"] > :is(thead, tbody, tfoot) > tr {
+    background-color: var(--row-bg);
+  }
+
+  /* The header and the totals: one band each, with a firmer line between
+   * them and the records. */
+  [data-slot="data-table"] > :is(thead, tfoot) > tr {
+    --row-bg: var(--color-table-head);
+  }
+  [data-slot="data-table"] > thead > tr {
+    border-bottom: 1px solid var(--color-table-rule);
+  }
+  [data-slot="data-table"] > tfoot {
+    border-top: 2px solid var(--color-table-rule);
+  }
+
+  /* Zebra: every second record, counting records only (a row that holds an
+   * opened editor or a breakdown does not shift the pattern). Where each
+   * record is a group of its own (`data-stripe="groups"`), every second group.
+   * Inside `:where()`, so the stripe is the weakest ground: an attention row
+   * and the row in hand always win over it. */
+  [data-slot="data-table"]
+    > :where([data-stripe="rows"])
+    > tr:where([data-row="record"]:nth-child(even of [data-row="record"])),
+  [data-slot="data-table"] > :where([data-stripe="groups"]:nth-of-type(even)) > tr {
+    --row-bg: var(--table-stripe, var(--color-table-stripe));
+  }
+
+  /* A row that needs attention: its ground, and a bar down its left edge.
+   * The bar is drawn in the first cell so it travels with a pinned column. */
+  [data-slot="data-table"] > tbody > tr[data-tone="danger"] {
+    --row-bg: var(--color-row-danger);
+    --row-mark: var(--color-danger-mark);
+  }
+  [data-slot="data-table"] > tbody > tr[data-tone="warning"] {
+    --row-bg: var(--color-row-warning);
+    --row-mark: var(--color-warning-mark);
+  }
+
+  /* The row in hand. An attention row keeps its own colour and deepens. */
+  [data-slot="data-table"] > tbody > tr[data-row="record"]:is(:hover, :focus-within) {
+    --row-bg: var(--color-table-hover);
+    --row-mark: var(--color-brand);
+  }
+  [data-slot="data-table"] > tbody > tr[data-row="record"][data-tone="danger"]:is(:hover, :focus-within) {
+    --row-bg: color-mix(in srgb, var(--color-row-danger), var(--color-danger-mark) 5%);
+    --row-mark: var(--color-danger-mark);
+  }
+  [data-slot="data-table"] > tbody > tr[data-row="record"][data-tone="warning"]:is(:hover, :focus-within) {
+    --row-bg: color-mix(in srgb, var(--color-row-warning), var(--color-warning-mark) 5%);
+    --row-mark: var(--color-warning-mark);
+  }
+  [data-slot="data-table"] > tbody > tr > :first-child {
+    background-image: linear-gradient(
+      to right,
+      var(--row-mark) 3px,
+      transparent 3px
+    );
+  }
+
+  /* A group of columns that belong together (what a person is paid; what the
+   * company pays): a veil of the group's colour over whatever ground the row
+   * has, so the stripe, the hover and an attention row all still show, and a
+   * rule of that colour under the group's column names. `data-strong` is the
+   * column of the group people look for. */
+  [data-slot="data-table"] :is(th, td)[data-group="teal"] {
+    --group: var(--color-kind-teal);
+  }
+  [data-slot="data-table"] :is(th, td)[data-group="violet"] {
+    --group: var(--color-kind-violet);
+  }
+  [data-slot="data-table"] :is(th, td)[data-group] {
+    background-image: linear-gradient(
+      color-mix(in srgb, var(--group) var(--group-veil), transparent),
+      color-mix(in srgb, var(--group) var(--group-veil), transparent)
+    );
+  }
+  [data-slot="data-table"] :is(th, td)[data-group][data-strong] {
+    background-image: linear-gradient(
+      color-mix(in srgb, var(--group) var(--group-veil-strong), transparent),
+      color-mix(in srgb, var(--group) var(--group-veil-strong), transparent)
+    );
+  }
+  [data-slot="data-table"] > thead > tr > th[data-group] {
+    box-shadow: inset 0 -2px 0 var(--group);
+  }
+}
+
+/* A figure that counts up (src/components/finance/motion.tsx): the hidden
+ * second row holds the final words, so the box is as wide as the end of the
+ * count from the start, and the count moves nothing beside it. */
+@utility count-up {
+  display: inline-grid;
+  grid-template-columns: max-content;
+  &::after {
+    content: attr(data-final);
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+  }
+}
+
+@utility font-num {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The logo's blue-to-ice gradient as a faint wash behind the headline panel. */
+@utility wash-brand {
+  background-image:
+    radial-gradient(120% 140% at 100% 0%, var(--wash-ice) 0%, var(--wash-ice-0) 55%),
+    radial-gradient(90% 120% at 0% 100%, var(--wash-blue) 0%, var(--wash-blue-0) 60%);
+}
+
+/* The three shadows, read from variables so the dark theme can replace them.
+ * Each joins Tailwind's own chain, so a ring beside one still draws. */
+@utility shadow-soft {
+  --tw-shadow: var(--shadow-soft);
+  box-shadow:
+    var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
+    var(--tw-shadow);
+}
+@utility shadow-soft-sm {
+  --tw-shadow: var(--shadow-soft-sm);
+  box-shadow:
+    var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
+    var(--tw-shadow);
+}
+@utility shadow-inset {
+  --tw-shadow: var(--shadow-inset);
+  box-shadow:
+    var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
+    var(--tw-shadow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Spotlight: a soft brand light under the pointer on every panel, and the
+ * stretch of its edge nearest the pointer lit. Adapted from 21st.dev's
+ * "Spotlight" (kevingirelli); src/components/ui/spotlight.tsx writes
+ * `--spot-x` / `--spot-y`. In the components layer, so a panel that is
+ * `absolute` or `sticky` (a menu, a bulk bar) keeps its own position. The
+ * light sits behind the content (`isolate`, z-index -1) and only fades:
+ * nothing moves under `prefers-reduced-motion` but the light itself, which
+ * goes where the pointer is told to go. Forced colours draw none of it.
+ * A mask reads only opacity: `--color-ink` is there as an opaque fill. */
+@layer components {
+  :is(.rounded-card.bg-panel, [data-spotlight]) {
+    position: relative;
+    isolation: isolate;
+  }
+  :is(.rounded-card.bg-panel, [data-spotlight])::before,
+  :is(.rounded-card.bg-panel, [data-spotlight])::after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 300ms ease;
+  }
+  :is(.rounded-card.bg-panel, [data-spotlight])::before {
+    background: radial-gradient(
+      380px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+      color-mix(in oklab, var(--color-brand) 9%, transparent),
+      transparent 70%
+    );
+  }
+  :is(.rounded-card.bg-panel, [data-spotlight])::after {
+    inset: -1px;
+    padding: 1px;
+    background: radial-gradient(
+      380px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+      color-mix(in oklab, var(--color-brand) 60%, transparent),
+      transparent 60%
+    );
+    mask-image:
+      linear-gradient(var(--color-ink) 0 0),
+      linear-gradient(var(--color-ink) 0 0);
+    mask-clip: content-box, border-box;
+    mask-composite: exclude;
+  }
+  @media (hover: hover) {
+    :is(.rounded-card.bg-panel, [data-spotlight]):is(:hover, :focus-within)::before,
+    :is(.rounded-card.bg-panel, [data-spotlight]):is(:hover, :focus-within)::after {
+      opacity: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :is(.rounded-card.bg-panel, [data-spotlight])::before,
+    :is(.rounded-card.bg-panel, [data-spotlight])::after {
+      transition: none;
+    }
+  }
+  @media (forced-colors: active) {
+    :is(.rounded-card.bg-panel, [data-spotlight])::before,
+    :is(.rounded-card.bg-panel, [data-spotlight])::after {
+      display: none;
+    }
+  }
+
+  /* Animated grid, behind a page's opening: a fine grid and a major one in
+   * the brand's tint, drifting, under a slowly breathing glow. Adapted from
+   * 21st.dev's "Animated Grid" (rmahammad); src/components/ui/animated-grid.tsx. */
+  .animated-grid {
+    mask-image: radial-gradient(ellipse at 30% 40%, var(--color-ink) 30%, transparent 75%);
+  }
+  .animated-grid::before,
+  .animated-grid::after {
+    content: "";
+    position: absolute;
+    inset: -144px;
+  }
+  .animated-grid::before {
+    background-image:
+      linear-gradient(to right, var(--color-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--color-line) 1px, transparent 1px);
+    background-size: 36px 36px;
+    opacity: 0.55;
+  }
+  .animated-grid::after {
+    background-image:
+      linear-gradient(to right, color-mix(in oklab, var(--color-brand) 45%, var(--color-line)) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in oklab, var(--color-brand) 45%, var(--color-line)) 1px, transparent 1px);
+    background-size: 144px 144px;
+    opacity: 0.35;
+  }
+  .animated-grid-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      40% 55% at 25% 40%,
+      color-mix(in oklab, var(--color-brand) 18%, transparent),
+      transparent 70%
+    );
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .animated-grid::before,
+    .animated-grid::after {
+      animation: grid-drift 30s linear infinite;
+    }
+    .animated-grid-glow {
+      animation: grid-breathe 9s ease-in-out infinite;
+    }
+  }
+  @media (forced-colors: active) {
+    .animated-grid {
+      display: none;
+    }
+  }
+  @keyframes grid-drift {
+    to {
+      transform: translate(144px, 144px);
+    }
+  }
+  @keyframes grid-breathe {
+    0%,
+    100% {
+      opacity: 0.7;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+  }
+}

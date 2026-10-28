@@ -1,0 +1,19 @@
+name: Question
+description: Ask how something in Startup OS works, or how to set it up.
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The answer may already be in the docs: the guide (docs/guide/), the setup guide (docs/setup.md) and "When something goes wrong" (docs/guide/troubleshooting.md). Never paste a token, a key or real data here.
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+    validations:
+      required: true
+  - type: textarea
+    id: tried
+    attributes:
+      label: What you tried
+      description: The docs you read, the commands you ran, and what happened (with secrets and addresses taken out).

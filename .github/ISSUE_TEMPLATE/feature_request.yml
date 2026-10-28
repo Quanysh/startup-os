@@ -1,0 +1,34 @@
+name: Feature request
+description: Suggest something Startup OS should do. Please open this before writing code.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Startup OS stays small on purpose, so we agree on an idea before anyone builds it. Use made-up data in examples.
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What you are trying to do as a founder or teammate, and what gets in the way today.
+      placeholder: Every Monday I copy last week's signups from our analytics tool into a spreadsheet to compare with the target.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What you suggest
+      description: How Startup OS could help. Which page, who would see it, where the data would come from.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you tried instead
+      description: Other ways you considered, including what Startup OS can already do (a pushed envelope, a typed-in figure, a bot).
+  - type: checkboxes
+    id: willing
+    attributes:
+      label: Building it
+      options:
+        - label: I would like to open the pull request myself.

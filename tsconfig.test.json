@@ -1,0 +1,11 @@
+{
+  // Type-checks the Convex test files, which neither other project covers:
+  // the root config excludes convex/, and convex/tsconfig.json excludes tests
+  // so they are not part of what gets deployed.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "incremental": false
+  },
+  "include": ["convex/**/*.test.ts", "convex/test.setup.ts"],
+  "exclude": ["node_modules"]
+}

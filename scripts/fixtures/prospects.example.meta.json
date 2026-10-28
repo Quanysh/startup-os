@@ -1,0 +1,5 @@
+{
+  "SECRET Example Specialty Partners": { "state": "TX", "physicians": 59, "locations": 29 },
+  "secret sample bone and joint": { "state": "OH", "physicians": "12", "locations": 3 },
+  "SECRET Not On The List": { "state": "CA", "physicians": 4, "locations": 1 }
+}
